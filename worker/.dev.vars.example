@@ -1,0 +1,9 @@
+# Copy to .dev.vars and fill in. Never commit .dev.vars.
+SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+SUPABASE_SERVICE_KEY=YOUR_SERVICE_ROLE_KEY
+RESEND_API_KEY=re_xxxxxxxx
+RESEND_FROM_EMAIL=FormFlux <forms@yourdomain.com>
+HCAPTCHA_SECRET=
+PUBLIC_BASE_URL=http://127.0.0.1:8787
+DASHBOARD_URL=http://localhost:3000
+DEFAULT_PLAN=free

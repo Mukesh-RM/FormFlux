@@ -1,0 +1,13 @@
+{
+  "name": "formflux-docs",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Generates the FormFlux engineering document PDF.",
+  "scripts": {
+    "build": "node generate-pdf.mjs"
+  },
+  "dependencies": {
+    "pdfkit": "^0.15.1"
+  }
+}

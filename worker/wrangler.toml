@@ -1,0 +1,48 @@
+name = "formflux"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Fill these in for local/prod, or override them in `.dev.vars`
+# (recommended for secrets) / `wrangler secret put`.
+[vars]
+SUPABASE_URL = ""
+SUPABASE_SERVICE_KEY = ""
+RESEND_API_KEY = ""
+RESEND_FROM_EMAIL = "FormFlux <beth.t@example.com>"
+HCAPTCHA_SECRET = ""
+PUBLIC_BASE_URL = ""
+DASHBOARD_URL = "http://localhost:3000"
+# Plan used for forms that have no owner yet (zero-config). Set to "pro" locally
+# if you want to exercise webhook/upload paths without seeding a profile row.
+DEFAULT_PLAN = "free"
+
+# Create with:
+#   npx wrangler kv namespace create RATE_LIMIT_KV
+#   npx wrangler kv namespace create RATE_LIMIT_KV --preview
+# Then replace the placeholder ids. `wrangler dev` still works locally with these
+# placeholders via Miniflare's simulated KV.
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "00000000000000000000000000000001"
+preview_id = "00000000000000000000000000000002"
+
+# Create with: npx wrangler r2 bucket create formflux-uploads
+# Local `wrangler dev` simulates the bucket automatically.
+[[r2_buckets]]
+binding = "FORM_UPLOADS"
+bucket_name = "formflux-uploads"
+
+# Create with: npx wrangler queues create webhook-retries
+[[queues.producers]]
+binding = "WEBHOOK_QUEUE"
+queue = "webhook-retries"
+
+[[queues.consumers]]
+queue = "webhook-retries"
+max_batch_size = 10
+max_retries = 0
+
+# Daily retention sweep (03:00 UTC)
+[triggers]
+crons = ["0 3 * * *"]
