@@ -1,5 +1,7 @@
 # FormFlux
 
+This is for redeployment purpose again.
+
 A production-ready, self-hostable alternative to FormSubmit.co. Point any HTML `<form>` at a
 FormFlux endpoint and get email delivery, spam protection, file uploads, webhooks, autoreply,
 retention policies, and an owner dashboard — with no server code in your project.
