@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+export const runtime = "edge";
+
 /**
  * Stripe Checkout stub. Once STRIPE_SECRET_KEY and NEXT_PUBLIC_STRIPE_PRICE_ID are
  * set, create a real Checkout Session here and return its URL — the client already

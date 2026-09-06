@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import type { FormRow } from "@/lib/types";
 import { workerUrl } from "@/lib/utils";
 
+export const runtime = "edge";
+
 export const metadata = { title: "Archive" };
 
 export default async function ArchivePage() {

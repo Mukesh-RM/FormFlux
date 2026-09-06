@@ -8,6 +8,8 @@ import { createClient } from "@/lib/supabase/server";
 import { FREE_MONTHLY_SUBMISSIONS, type Plan } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+export const runtime = "edge";
+
 export const metadata = {
   title: "Pricing",
   description: "One free form forever. Pro adds uploads, webhooks, autoreply, and analytics.",

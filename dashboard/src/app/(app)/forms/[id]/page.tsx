@@ -8,6 +8,8 @@ import { createClient } from "@/lib/supabase/server";
 import type { FormRow, Plan } from "@/lib/types";
 import { workerUrl } from "@/lib/utils";
 
+export const runtime = "edge";
+
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const supabase = createClient();
   const { data } = await supabase.from("forms").select("name").eq("id", params.id).maybeSingle();

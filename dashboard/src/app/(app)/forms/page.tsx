@@ -5,6 +5,8 @@ import { CreateFormDialog } from "@/components/create-form-dialog";
 import { planFeatures, type FormRow, type Plan } from "@/lib/types";
 import { workerUrl } from "@/lib/utils";
 
+export const runtime = "edge";
+
 export const metadata = { title: "Forms" };
 
 function monthStartIso(): string {

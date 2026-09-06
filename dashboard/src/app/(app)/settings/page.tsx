@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { createClient } from "@/lib/supabase/server";
 import { planFeatures, type Plan } from "@/lib/types";
 
+export const runtime = "edge";
+
 export const metadata = { title: "Settings" };
 
 function monthStartIso(): string {
