@@ -57,10 +57,11 @@ create table webhook_logs (
   created_at timestamptz default now()
 );
 
-create extension if not exists pg_trgm;
+create schema if not exists extensions;
+create extension if not exists pg_trgm with schema extensions;
 
 create index submissions_form_created_idx on submissions (form_id, created_at desc);
-create index submissions_search_idx on submissions using gin (search_text gin_trgm_ops);
+create index submissions_search_idx on submissions using gin (search_text extensions.gin_trgm_ops);
 create index submissions_spam_idx on submissions (form_id, is_spam);
 create index webhook_logs_submission_idx on webhook_logs (submission_id);
 create index webhook_logs_form_idx on webhook_logs (form_id, created_at desc);
@@ -71,29 +72,29 @@ alter table forms enable row level security;
 alter table submissions enable row level security;
 alter table webhook_logs enable row level security;
 
-create policy "Users see own profile" on profiles for select using (auth.uid() = id);
-create policy "Users insert own profile" on profiles for insert with check (auth.uid() = id);
-create policy "Users update own profile" on profiles for update using (auth.uid() = id);
+create policy "Users see own profile" on profiles for select using ((select auth.uid()) = id);
+create policy "Users insert own profile" on profiles for insert with check ((select auth.uid()) = id);
+create policy "Users update own profile" on profiles for update using ((select auth.uid()) = id);
 
-create policy "Users manage own forms" on forms for all using (auth.uid() = owner_id);
+create policy "Users manage own forms" on forms for all using ((select auth.uid()) = owner_id);
 
 create policy "Users see own submissions" on submissions for select using (
-  form_id in (select id from forms where owner_id = auth.uid())
+  form_id in (select id from forms where owner_id = (select auth.uid()))
 );
 create policy "Users update own submissions" on submissions for update using (
-  form_id in (select id from forms where owner_id = auth.uid())
+  form_id in (select id from forms where owner_id = (select auth.uid()))
 );
 create policy "Users delete own submissions" on submissions for delete using (
-  form_id in (select id from forms where owner_id = auth.uid())
+  form_id in (select id from forms where owner_id = (select auth.uid()))
 );
 
 create policy "Users see own webhook logs" on webhook_logs for select using (
-  form_id in (select id from forms where owner_id = auth.uid())
+  form_id in (select id from forms where owner_id = (select auth.uid()))
   or submission_id in (
     select submissions.id
     from submissions
     join forms on forms.id = submissions.form_id
-    where forms.owner_id = auth.uid()
+    where forms.owner_id = (select auth.uid())
   )
 );
 
