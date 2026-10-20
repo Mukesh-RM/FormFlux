@@ -4,6 +4,12 @@ import { NextResponse, type NextRequest } from "next/server";
 const PROTECTED_PREFIXES = ["/forms", "/archive", "/settings"];
 
 export async function middleware(request: NextRequest) {
+  // www.formflux.online → formflux.online, keeping path and query.
+  if (request.headers.get("host") === "www.formflux.online") {
+    const target = new URL(request.nextUrl.pathname + request.nextUrl.search, "https://formflux.online");
+    return NextResponse.redirect(target, 301);
+  }
+
   let response = NextResponse.next({ request: { headers: request.headers } });
 
   const supabase = createServerClient(
