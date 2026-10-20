@@ -47,7 +47,7 @@ const FEATURES = [
   },
 ];
 
-const SNIPPET = `<form action="https://api.formflux.dev/f/YOUR_FORM_ID" method="POST">
+const SNIPPET = `<form action="https://api.formflux.online/f/YOUR_FORM_ID" method="POST">
   <input name="name" required />
   <input type="email" name="email" required />
   <textarea name="message"></textarea>
