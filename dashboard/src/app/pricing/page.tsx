@@ -18,7 +18,7 @@ export const metadata = {
 const FREE = [
   { label: "1 form", included: true },
   { label: `${FREE_MONTHLY_SUBMISSIONS} submissions / month`, included: true },
-  { label: "Email delivery via Resend (owner-only for now; custom domains coming soon)", included: true },
+  { label: "Email delivery via Resend", included: true },
   { label: "Honeypot, blacklist & spam heuristics", included: true },
   { label: "hCaptcha support (not available yet)", included: false },
   { label: "Every special field (_next, _cc, _subject…)", included: true },

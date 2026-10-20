@@ -104,18 +104,18 @@ const OPTIONS: [string, string][] = [
 ];
 
 const TROUBLESHOOTING: [string, string][] = [
-  ["I submitted the form but got no email.", "Email delivery is not fully live yet — right now it only reaches the FormFlux owner's address, so look in the dashboard. Custom-domain email delivery is coming soon. Otherwise, check your spam folder. If you used the email-address URL, you must click the verification link FormFlux sent you before anything is delivered. Submissions flagged as spam are saved but never emailed. Every submission still shows up in the dashboard, so look there too."],
+  ["I submitted the form but got no email.", "Check your spam folder first. If you used the email-address URL, you must click the verification link FormFlux sent you before anything is delivered. Submissions flagged as spam are saved but never emailed. Every submission still shows up in the dashboard, so look there too."],
   ["It says “This form is not verified yet”.", "You are using the email-address URL. Open the verification email FormFlux sent to that address and click the link once. After that, submissions go through."],
   ["It says the captcha is required.", "Captcha is not available yet. Switch off Require hCaptcha in the form's settings and try again."],
   ["It says “Too many submissions” or a rate limit was hit.", "Each form accepts a set number of submissions per hour (100 by default) from the same visitor. Wait a while, or raise the limit in the form's settings."],
   ["File uploads are rejected.", "File uploads are not available yet. When they are, they'll need the Pro plan, enctype=\"multipart/form-data\" on the form, and 10 MB or less in total (10 files at most)."],
   ["Some fields come back with errors.", "Your form has validation rules (Settings → Validation rules). The reply lists which fields failed so you can show the message to the visitor."],
-  ["I can't sign in.", "Sign-in uses a magic link. For now those emails only reach the FormFlux owner's address, until FormFlux's sending domain is set up. If you are the owner, use the newest link in your inbox, open it in the same browser, and check your spam folder."],
+  ["I can't sign in.", "Sign-in uses a magic link. Use the newest link in your inbox, open it in the same browser, and check your spam folder."],
 ];
 
 const FAQ: [string, string][] = [
   ["Do I need to write any server code?", "No. You point your form at a FormFlux address and FormFlux does the rest."],
-  ["Do I need a password?", "No. You sign in with a magic link sent to your email (for now, only the FormFlux owner's address receives these)."],
+  ["Do I need a password?", "No. You sign in with a magic link sent to your email."],
   ["Is my email address visible on my website?", "Only if you use the email-address URL. A dashboard form uses a random ID instead, so your address stays private."],
   ["Can I use any website builder?", "Yes, as long as you can paste HTML or add a form that posts to a web address."],
   ["How long are submissions kept?", "Each form has a retention setting (90 days by default). A daily clean-up removes submissions older than that, along with their files."],
@@ -182,7 +182,7 @@ export default function GuidePage() {
         <Section id="what" title="What is FormFlux?">
           <p>
             FormFlux receives the forms on your website — contact forms, sign-ups, enquiries — and
-            sends each submission to your email (custom-domain email delivery is coming soon). It also keeps a copy in your dashboard so you can
+            sends each submission to your email. It also keeps a copy in your dashboard so you can
             read, search and manage them later. You don&apos;t need your own server.
           </p>
         </Section>
@@ -193,10 +193,6 @@ export default function GuidePage() {
             <strong>Send magic link</strong>. Open the email and click the link — you&apos;re in. There
             is no password to remember. Signing in for the first time creates your account on the
             free plan.
-          </p>
-          <p>
-            <strong>Note:</strong> until FormFlux&apos;s own sending domain is set up, magic-link
-            emails only reach the FormFlux owner&apos;s address, so other people can&apos;t sign in yet.
           </p>
         </Section>
 
@@ -216,7 +212,7 @@ export default function GuidePage() {
           <p>
             In a hurry? You can also skip the dashboard and use{" "}
             <code className="break-all">{WORKER}/email/you@example.com</code> as the address. The first submission sends
-            you a verification email; click it once and you&apos;re set. (Until custom-domain email delivery is live, that verification email only reaches the FormFlux owner&apos;s address, so for now use a dashboard form.) This shows your email
+            you a verification email; click it once and you&apos;re set. This shows your email
             address in your page&apos;s code, so switch to a dashboard form before going live.
           </p>
         </Section>
@@ -254,7 +250,7 @@ export default function GuidePage() {
           <ol className="list-decimal space-y-2 pl-5">
             <li>FormFlux checks the submission: the bot trap, captcha (if on), your validation rules and the hourly limit.</li>
             <li>It is saved to your dashboard, where you can see it under the form&apos;s <strong>Submissions</strong> tab.</li>
-            <li>An email with every field is sent to you. <strong>Email delivery is not fully live yet:</strong> until FormFlux&apos;s own sending domain is set up, notification emails only reach the FormFlux owner&apos;s address, so check the dashboard for your submissions. Custom-domain email delivery is coming soon. On Pro, an automatic thank-you email can go to the visitor, and webhooks can send a copy to Slack, Discord or another app.</li>
+            <li>An email with every field is sent to you. On Pro, an automatic thank-you email can go to the visitor, and webhooks can send a copy to Slack, Discord or another app.</li>
             <li>The visitor is taken to a thank-you page — yours if you set one, otherwise FormFlux&apos;s.</li>
             <li>Every submission stays searchable on the <strong>Archive</strong> page until it reaches the form&apos;s retention limit.</li>
           </ol>
@@ -293,7 +289,7 @@ export default function GuidePage() {
         <Section id="plans" title="Limits and plans">
           <List
             items={[
-              ["Free", "1 form and 50 submissions per month. Dashboard, archive and spam protection are included. Email delivery is coming soon and captcha isn't available yet."],
+              ["Free", "1 form and 50 submissions per month. Email delivery, dashboard, archive and spam protection are included. Captcha isn't available yet."],
               ["Pro", "Unlimited forms and submissions, plus webhooks, autoreply and analytics. File uploads are not available yet."],
               ["Upgrading", "Paid upgrades are coming later. For now, every account is on the free plan."],
             ]}
