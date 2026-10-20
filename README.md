@@ -32,7 +32,7 @@ FormFlux/
 Run **one** of these in the Supabase SQL editor:
 
 - New project → paste `supabase/schema.sql`
-- Existing FormFlux install (phases 1–3) → paste `supabase/migrations/002_dashboard.sql`
+- Existing FormFlux install (phases 1–3) → paste `supabase/migrations/002_dashboard.sql`, then `003_harden_handle_new_user.sql`
 
 Both create the `profiles`, `forms`, `submissions`, and `webhook_logs` tables with row-level
 security, a trigger that gives every new auth user a free `profiles` row, and a generated
