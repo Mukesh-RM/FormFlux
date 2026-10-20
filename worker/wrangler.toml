@@ -5,6 +5,8 @@ compatibility_flags = ["nodejs_compat"]
 
 # Custom domain (needs the formflux.online zone active on Cloudflare).
 routes = [{ pattern = "api.formflux.online", custom_domain = true }]
+# Keep the original workers.dev URL live for forms that already embed it.
+workers_dev = true
 
 # Fill these in for local/prod, or override them in `.dev.vars`
 # (recommended for secrets) / `wrangler secret put`.
