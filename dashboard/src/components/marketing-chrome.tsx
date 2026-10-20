@@ -15,7 +15,7 @@ export function MarketingNav() {
     <header className="sticky top-0 z-40 border-b bg-[rgb(var(--bg))]/85 backdrop-blur">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-3 py-3.5 sm:flex-nowrap sm:gap-4 sm:px-6">
         <Wordmark />
-        <nav className="flex min-w-0 items-center gap-0 sm:gap-1">
+        <nav className="flex items-center gap-0 sm:gap-1">
           {LINKS.map((link) => (
             <Link
               key={link.href}
