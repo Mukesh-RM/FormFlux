@@ -18,9 +18,9 @@ export const metadata = {
 const FREE = [
   { label: "1 form", included: true },
   { label: `${FREE_MONTHLY_SUBMISSIONS} submissions / month`, included: true },
-  { label: "Email delivery via Resend", included: true },
+  { label: "Email delivery via Resend (owner-only for now; custom domains coming soon)", included: true },
   { label: "Honeypot, blacklist & spam heuristics", included: true },
-  { label: "hCaptcha support", included: true },
+  { label: "hCaptcha support (not available yet)", included: false },
   { label: "Every special field (_next, _cc, _subject…)", included: true },
   { label: "Submission archive & CSV export", included: true },
   { label: "FormFlux branding on the thank-you page", included: true },
@@ -33,7 +33,7 @@ const FREE = [
 const PRO = [
   { label: "Unlimited forms", included: true },
   { label: "Unlimited submissions", included: true },
-  { label: "File uploads to R2 (10MB per submission)", included: true },
+  { label: "File uploads to R2, 10MB per submission (not available yet)", included: false },
   { label: "Webhooks with retries + delivery log", included: true },
   { label: "Slack & Discord destinations", included: true },
   { label: "Autoreply with templates", included: true },

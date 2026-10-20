@@ -81,8 +81,8 @@ export default function LandingPage() {
             className="pointer-events-none absolute inset-x-0 -top-40 h-80 bg-gradient-to-b from-accent-100/60 to-transparent blur-3xl dark:from-accent-950/40"
             aria-hidden
           />
-          <div className="mx-auto grid max-w-6xl gap-12 px-4 pb-16 pt-14 sm:px-6 sm:pb-20 sm:pt-20 lg:grid-cols-[1.05fr_1fr] lg:items-start lg:gap-16">
-            <div className="animate-fade-in">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-4 pb-16 pt-14 sm:px-6 sm:pb-20 sm:pt-20 lg:grid-cols-[1.05fr_1fr] lg:items-start lg:gap-16">
+            <div className="min-w-0 animate-fade-in">
               <span className="inline-flex items-center gap-2 rounded-full border border-accent-200 bg-accent-50 px-3 py-1 text-[0.75rem] font-semibold text-accent-700 dark:border-accent-900 dark:bg-accent-950/40 dark:text-accent-300">
                 Free tier, no credit card
               </span>
@@ -109,7 +109,7 @@ export default function LandingPage() {
                 </Button>
               </div>
 
-              <div className="mt-10 overflow-hidden rounded-xl border bg-stone-900">
+              <div className="mt-10 min-w-0 overflow-hidden rounded-xl border bg-stone-900">
                 <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
                   <span className="font-mono text-[0.72rem] text-stone-400">index.html</span>
                   <CopyButton

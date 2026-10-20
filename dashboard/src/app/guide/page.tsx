@@ -110,12 +110,12 @@ const TROUBLESHOOTING: [string, string][] = [
   ["It says “Too many submissions” or a rate limit was hit.", "Each form accepts a set number of submissions per hour (100 by default) from the same visitor. Wait a while, or raise the limit in the form's settings."],
   ["File uploads are rejected.", "File uploads are not available yet. When they are, they'll need the Pro plan, enctype=\"multipart/form-data\" on the form, and 10 MB or less in total (10 files at most)."],
   ["Some fields come back with errors.", "Your form has validation rules (Settings → Validation rules). The reply lists which fields failed so you can show the message to the visitor."],
-  ["I can't sign in.", "Sign-in uses a magic link. Use the newest link in your inbox, open it in the same browser, and check your spam folder."],
+  ["I can't sign in.", "Sign-in uses a magic link. For now those emails only reach the FormFlux owner's address, until FormFlux's sending domain is set up. If you are the owner, use the newest link in your inbox, open it in the same browser, and check your spam folder."],
 ];
 
 const FAQ: [string, string][] = [
   ["Do I need to write any server code?", "No. You point your form at a FormFlux address and FormFlux does the rest."],
-  ["Do I need a password?", "No. You sign in with a magic link sent to your email."],
+  ["Do I need a password?", "No. You sign in with a magic link sent to your email (for now, only the FormFlux owner's address receives these)."],
   ["Is my email address visible on my website?", "Only if you use the email-address URL. A dashboard form uses a random ID instead, so your address stays private."],
   ["Can I use any website builder?", "Yes, as long as you can paste HTML or add a form that posts to a web address."],
   ["How long are submissions kept?", "Each form has a retention setting (90 days by default). A daily clean-up removes submissions older than that, along with their files."],
@@ -193,6 +193,10 @@ export default function GuidePage() {
             <strong>Send magic link</strong>. Open the email and click the link — you&apos;re in. There
             is no password to remember. Signing in for the first time creates your account on the
             free plan.
+          </p>
+          <p>
+            <strong>Note:</strong> until FormFlux&apos;s own sending domain is set up, magic-link
+            emails only reach the FormFlux owner&apos;s address, so other people can&apos;t sign in yet.
           </p>
         </Section>
 
