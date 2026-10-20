@@ -261,3 +261,17 @@ node node_modules/typescript/bin/tsc --noEmit
 cd dashboard && npm run dev
 npm run typecheck && npm run build
 ```
+
+---
+
+## Production domain switch (formflux.online)
+
+Run once the `formflux.online` zone is active on Cloudflare:
+
+1. Worker: `cd worker && npx wrangler deploy` (this branch sets `PUBLIC_BASE_URL`,
+   `DASHBOARD_URL` and the `api.formflux.online` custom domain in `wrangler.toml`).
+2. Pages project `formflux`, production + preview env vars:
+   `NEXT_PUBLIC_WORKER_URL=https://api.formflux.online`,
+   `NEXT_PUBLIC_SITE_URL=https://formflux.online`, then rebuild and deploy the dashboard.
+3. Supabase → Auth → URL configuration: site URL `https://formflux.online`. Keep the
+   `formflux.pages.dev` redirect entries until the old URLs are retired.

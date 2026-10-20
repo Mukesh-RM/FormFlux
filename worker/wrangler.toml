@@ -3,6 +3,9 @@ main = "src/index.ts"
 compatibility_date = "2025-09-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Custom domain (needs the formflux.online zone active on Cloudflare).
+routes = [{ pattern = "api.formflux.online", custom_domain = true }]
+
 # Fill these in for local/prod, or override them in `.dev.vars`
 # (recommended for secrets) / `wrangler secret put`.
 [vars]
@@ -11,8 +14,8 @@ compatibility_flags = ["nodejs_compat"]
 # RESEND_API_KEY: set with `wrangler secret put RESEND_API_KEY`
 RESEND_FROM_EMAIL = "FormFlux <noreply@formflux.online>"
 # HCAPTCHA_SECRET: set with `wrangler secret put HCAPTCHA_SECRET`
-PUBLIC_BASE_URL = "https://formflux.mukeshwar-1010.workers.dev"
-DASHBOARD_URL = "https://formflux.pages.dev"
+PUBLIC_BASE_URL = "https://api.formflux.online"
+DASHBOARD_URL = "https://formflux.online"
 # Plan used for forms that have no owner yet (zero-config). Set to "pro" locally
 # if you want to exercise webhook/upload paths without seeding a profile row.
 DEFAULT_PLAN = "free"
