@@ -9,7 +9,7 @@ compatibility_flags = ["nodejs_compat"]
 # SUPABASE_URL: set with `wrangler secret put SUPABASE_URL`
 # SUPABASE_SERVICE_KEY: set with `wrangler secret put SUPABASE_SERVICE_KEY`
 # RESEND_API_KEY: set with `wrangler secret put RESEND_API_KEY`
-RESEND_FROM_EMAIL = "FormFlux <onboarding@resend.dev>"
+RESEND_FROM_EMAIL = "FormFlux <noreply@formflux.online>"
 # HCAPTCHA_SECRET: set with `wrangler secret put HCAPTCHA_SECRET`
 PUBLIC_BASE_URL = "https://formflux.mukeshwar-1010.workers.dev"
 DASHBOARD_URL = "https://formflux.pages.dev"
