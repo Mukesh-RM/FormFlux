@@ -13,20 +13,20 @@ const LINKS = [
 export function MarketingNav() {
   return (
     <header className="sticky top-0 z-40 border-b bg-[rgb(var(--bg))]/85 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 py-3.5 sm:gap-4 sm:px-6">
         <Wordmark />
-        <nav className="flex items-center gap-1">
+        <nav className="flex min-w-0 items-center gap-0 sm:gap-1">
           {LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:text-[rgb(var(--text))]"
+              className="rounded-lg px-1.5 py-1.5 text-sm font-medium text-muted transition-colors hover:text-[rgb(var(--text))] sm:px-3"
             >
               {link.label}
             </Link>
           ))}
           <ThemeToggle />
-          <Button asChild variant="primary" size="sm" className="ml-1">
+          <Button asChild variant="primary" size="sm" className="ml-1 whitespace-nowrap">
             <Link href="/login">Get started</Link>
           </Button>
         </nav>

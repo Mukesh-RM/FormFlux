@@ -66,7 +66,7 @@ const FIELDS: { name: string; what: string; example: string }[] = [
   },
   {
     name: "_captcha",
-    what: `Set to "false" to skip hCaptcha for this submission, even when the form requires it.`,
+    what: `Set to "false" to say this submission has no captcha. Ignored when the form owner requires hCaptcha.`,
     example: `<input type="hidden" name="_captcha" value="false" />`,
   },
   {

@@ -39,7 +39,12 @@ const FETCH_EXAMPLE = `<form id="contact">
       body: new FormData(event.target),
     });
     const result = await response.json();
-    alert(result.success ? "Thanks! We got your message." : result.error);
+    // Errors come back as { success: false, errors: [{ field, message }] } for
+    // invalid fields, or { success: false, error: "..." } for everything else.
+    const problem = result.errors
+      ? result.errors.map((e) => e.message).join(", ")
+      : result.error;
+    alert(result.success ? "Thanks! We got your message." : problem);
   });
 </script>`;
 
@@ -57,7 +62,11 @@ export function ContactForm() {
       body: new FormData(event.currentTarget),
     });
     const result = await response.json();
-    setStatus(result.success ? "Thanks! We got your message." : result.error);
+    // { success: false, errors: [{ field, message }] } or { success: false, error }
+    const problem = result.errors
+      ? result.errors.map((e) => e.message).join(", ")
+      : result.error;
+    setStatus(result.success ? "Thanks! We got your message." : problem);
   }
 
   return (
@@ -87,7 +96,7 @@ const OPTIONS: [string, string][] = [
   ["_replyto", "Lets you hit Reply in your inbox and answer the sender directly."],
   ["_cc", "Extra people to copy on the email, separated by commas."],
   ["_blacklist", "Words or phrases, separated by commas (up to 20), that mark a submission as spam."],
-  ["_captcha", `Set to "false" to skip the captcha for this one form on your page, even if captcha is switched on.`],
+  ["_captcha", `Ignored when the form requires a captcha, so it cannot be used to get around it.`],
   ["_autoresponse", "A custom thank-you email sent to the visitor. You can use {{name}}-style placeholders. Pro plan."],
   ["_template", `Look of the email you receive: "table" (the default) or "plain".`],
   ["_webhook", "An extra web address that receives a copy of the submission. Pro plan."],
@@ -95,11 +104,11 @@ const OPTIONS: [string, string][] = [
 ];
 
 const TROUBLESHOOTING: [string, string][] = [
-  ["I submitted the form but got no email.", "Check your spam folder first. If you used the email-address URL, you must click the verification link FormFlux sent you before anything is delivered. Submissions flagged as spam are saved but never emailed. Every submission still shows up in the dashboard, so look there too."],
+  ["I submitted the form but got no email.", "Email delivery is not fully live yet — right now it only reaches the FormFlux owner's address, so look in the dashboard. Custom-domain email delivery is coming soon. Otherwise, check your spam folder. If you used the email-address URL, you must click the verification link FormFlux sent you before anything is delivered. Submissions flagged as spam are saved but never emailed. Every submission still shows up in the dashboard, so look there too."],
   ["It says “This form is not verified yet”.", "You are using the email-address URL. Open the verification email FormFlux sent to that address and click the link once. After that, submissions go through."],
-  ["It says the captcha is required.", "Captcha is switched on for this form, so your page needs the hCaptcha box shown above. Add it, or switch captcha off in the form's settings."],
+  ["It says the captcha is required.", "Captcha is not available yet. Switch off Require hCaptcha in the form's settings and try again."],
   ["It says “Too many submissions” or a rate limit was hit.", "Each form accepts a set number of submissions per hour (100 by default) from the same visitor. Wait a while, or raise the limit in the form's settings."],
-  ["File uploads are rejected.", "Uploads are a Pro feature. On Pro, check that your form has enctype=\"multipart/form-data\" and that the files are 10 MB or less in total (10 files at most)."],
+  ["File uploads are rejected.", "File uploads are not available yet. When they are, they'll need the Pro plan, enctype=\"multipart/form-data\" on the form, and 10 MB or less in total (10 files at most)."],
   ["Some fields come back with errors.", "Your form has validation rules (Settings → Validation rules). The reply lists which fields failed so you can show the message to the visitor."],
   ["I can't sign in.", "Sign-in uses a magic link. Use the newest link in your inbox, open it in the same browser, and check your spam folder."],
 ];
@@ -173,7 +182,7 @@ export default function GuidePage() {
         <Section id="what" title="What is FormFlux?">
           <p>
             FormFlux receives the forms on your website — contact forms, sign-ups, enquiries — and
-            sends each submission to your email. It also keeps a copy in your dashboard so you can
+            sends each submission to your email (custom-domain email delivery is coming soon). It also keeps a copy in your dashboard so you can
             read, search and manage them later. You don&apos;t need your own server.
           </p>
         </Section>
@@ -193,7 +202,7 @@ export default function GuidePage() {
             the email address where submissions should go. FormFlux gives the form its own address
             (its &ldquo;endpoint&rdquo;), which looks like this:
           </p>
-          <pre className="overflow-x-auto rounded-lg bg-stone-100 p-3 font-mono text-[0.74rem] text-stone-700 dark:bg-stone-800/60 dark:text-stone-300">
+          <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded-lg bg-stone-100 p-3 font-mono text-[0.74rem] text-stone-700 dark:bg-stone-800/60 dark:text-stone-300">
             {ENDPOINT}
           </pre>
           <p>
@@ -202,8 +211,8 @@ export default function GuidePage() {
           </p>
           <p>
             In a hurry? You can also skip the dashboard and use{" "}
-            <code>{WORKER}/email/you@example.com</code> as the address. The first submission sends
-            you a verification email; click it once and you&apos;re set. This shows your email
+            <code className="break-all">{WORKER}/email/you@example.com</code> as the address. The first submission sends
+            you a verification email; click it once and you&apos;re set. (Until custom-domain email delivery is live, that verification email only reaches the FormFlux owner&apos;s address, so for now use a dashboard form.) This shows your email
             address in your page&apos;s code, so switch to a dashboard form before going live.
           </p>
         </Section>
@@ -227,9 +236,10 @@ export default function GuidePage() {
           <List items={OPTIONS} />
         </Section>
 
-        <Section id="uploads" title="File uploads">
+        <Section id="uploads" title="File uploads (not available yet)">
           <p>
-            File uploads are part of the Pro plan. Add a file input and set{" "}
+            <strong>Not available yet:</strong> file storage is still being set up, so uploads
+            can&apos;t be accepted right now. When it&apos;s ready, file uploads will be part of the Pro plan. Add a file input and set{" "}
             <code>enctype=&quot;multipart/form-data&quot;</code> on the form. Each submission can
             include up to 10 files, 10 MB in total. The email you receive contains download links.
           </p>
@@ -240,7 +250,7 @@ export default function GuidePage() {
           <ol className="list-decimal space-y-2 pl-5">
             <li>FormFlux checks the submission: the bot trap, captcha (if on), your validation rules and the hourly limit.</li>
             <li>It is saved to your dashboard, where you can see it under the form&apos;s <strong>Submissions</strong> tab.</li>
-            <li>You get an email with every field. On Pro, an automatic thank-you email can go to the visitor, and webhooks can send a copy to Slack, Discord or another app.</li>
+            <li>An email with every field is sent to you. <strong>Email delivery is not fully live yet:</strong> until FormFlux&apos;s own sending domain is set up, notification emails only reach the FormFlux owner&apos;s address, so check the dashboard for your submissions. Custom-domain email delivery is coming soon. On Pro, an automatic thank-you email can go to the visitor, and webhooks can send a copy to Slack, Discord or another app.</li>
             <li>The visitor is taken to a thank-you page — yours if you set one, otherwise FormFlux&apos;s.</li>
             <li>Every submission stays searchable on the <strong>Archive</strong> page until it reaches the form&apos;s retention limit.</li>
           </ol>
@@ -251,11 +261,11 @@ export default function GuidePage() {
           <ul className="list-disc space-y-2 pl-5">
             <li><strong>Bot trap:</strong> the hidden <code>_honey</code> field. Bots that fill it in are silently ignored.</li>
             <li><strong>Spam filter:</strong> messages with 3 or more links or common spam phrases, or words from your blacklist, are saved and marked as spam but never emailed. The sender still sees a normal success message.</li>
-            <li><strong>Captcha:</strong> switch on <strong>Require hCaptcha</strong> in the form&apos;s settings and add the hCaptcha box to your page. Submissions without a solved captcha are rejected.</li>
+            <li><strong>Captcha (not available yet):</strong> captcha checking is still being set up. Please leave <strong>Require hCaptcha</strong> switched off for now — while it&apos;s on, submissions can&apos;t get through. Once it&apos;s live, you&apos;ll add the hCaptcha box below to your page.</li>
             <li><strong>Hourly limit:</strong> stops one visitor from flooding a form.</li>
           </ul>
           <p>If a real message was marked as spam by mistake, you can correct it from the dashboard.</p>
-          <Snippet title="hCaptcha box" description="Paste inside your form, using your own hCaptcha site key." code={CAPTCHA_EXAMPLE} />
+          <Snippet title="hCaptcha box" description="Not available yet. For later: paste inside your form, using your own hCaptcha site key." code={CAPTCHA_EXAMPLE} />
         </Section>
 
         <Section id="settings" title="Settings">
@@ -279,8 +289,8 @@ export default function GuidePage() {
         <Section id="plans" title="Limits and plans">
           <List
             items={[
-              ["Free", "1 form and 50 submissions per month. Email delivery, dashboard, archive, spam protection and captcha are included."],
-              ["Pro", "Unlimited forms and submissions, plus file uploads, webhooks, autoreply and analytics."],
+              ["Free", "1 form and 50 submissions per month. Dashboard, archive and spam protection are included. Email delivery is coming soon and captcha isn't available yet."],
+              ["Pro", "Unlimited forms and submissions, plus webhooks, autoreply and analytics. File uploads are not available yet."],
               ["Upgrading", "Paid upgrades are coming later. For now, every account is on the free plan."],
             ]}
           />
