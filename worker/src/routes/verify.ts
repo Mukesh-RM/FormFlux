@@ -10,11 +10,20 @@ verifyRoutes.get("/verify/:token", async (c) => {
   }
 
   const supabase = createSupabase(c.env);
-  const { data: form, error } = await supabase
-    .from("forms")
-    .select("*")
-    .eq("verification_token", token)
-    .maybeSingle<FormRow>();
+  // Tokens are server-only (form_verification_tokens, service role).
+  const { data: row, error: tokenError } = await supabase
+    .from("form_verification_tokens")
+    .select("form_id")
+    .eq("token", token)
+    .maybeSingle<{ form_id: string }>();
+
+  let form: FormRow | null = null;
+  let error = tokenError;
+  if (!tokenError && row) {
+    const res = await supabase.from("forms").select("*").eq("id", row.form_id).maybeSingle<FormRow>();
+    form = res.data;
+    error = res.error;
+  }
 
   if (error) {
     console.error("Failed to look up verification token:", error.message);

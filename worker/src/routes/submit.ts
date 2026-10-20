@@ -54,6 +54,16 @@ submitRoutes.post("/f/:formId", async (c) => {
   }
 
   const { fields, files } = await parseSubmission(c);
+
+  if (!form.is_verified) {
+    const special = parseSpecialFields(fields);
+    if (special.honeypot.length > 0) {
+      return successResponse(c, special, form, crypto.randomUUID(), "free");
+    }
+    await sendFormVerification(c, form.id, form.target_email ?? "");
+    return unverifiedResponse(c, form.target_email ?? "", special);
+  }
+
   return handleSubmission(c, form, fields, files);
 });
 
@@ -91,14 +101,12 @@ submitRoutes.post("/email/:encodedEmail{.+}", async (c) => {
   let form = (existing?.[0] as FormRow | undefined) ?? null;
 
   if (!form) {
-    const verificationToken = randomToken();
     const { data: created, error: createError } = await supabase
       .from("forms")
       .insert({
         name: `Form for ${email}`,
         target_email: email,
         is_verified: false,
-        verification_token: verificationToken,
       })
       .select("*")
       .single();
@@ -109,18 +117,7 @@ submitRoutes.post("/email/:encodedEmail{.+}", async (c) => {
     }
 
     form = created as FormRow;
-    const verifyUrl = `${new URL(c.req.url).origin}/verify/${verificationToken}`;
-    const sent = await sendVerificationEmail({
-      apiKey: c.env.RESEND_API_KEY,
-      from: fromAddress(c.env.RESEND_FROM_EMAIL),
-      to: email,
-      verifyUrl,
-    });
-
-    if (!sent.sent) {
-      console.error("Verification email was not sent:", sent.error);
-    }
-
+    await sendFormVerification(c, form.id, email);
     return unverifiedResponse(c, email, special);
   }
 
@@ -524,6 +521,48 @@ function decodeTargetEmail(encoded: string): string | null {
     if (EMAIL_RE.test(email)) return email;
   }
   return null;
+}
+
+// Minimum gap between verification emails for the same form, so posting to an
+// unverified form can't be used to flood the target inbox.
+const VERIFICATION_RESEND_MS = 60 * 60 * 1000;
+
+/**
+ * Issue a server-generated token (service role only; tokens live in the private
+ * form_verification_tokens table) and email the verify link to the target.
+ */
+async function sendFormVerification(c: AppContext, formId: string, email: string): Promise<void> {
+  if (!email) return;
+  const supabase = createSupabase(c.env);
+  const { data: existing } = await supabase
+    .from("form_verification_tokens")
+    .select("created_at")
+    .eq("form_id", formId)
+    .maybeSingle<{ created_at: string }>();
+
+  if (existing && Date.now() - new Date(existing.created_at).getTime() < VERIFICATION_RESEND_MS) {
+    return; // a link was sent recently
+  }
+
+  const token = randomToken();
+  const { error } = await supabase
+    .from("form_verification_tokens")
+    .upsert({ form_id: formId, token, created_at: new Date().toISOString() }, { onConflict: "form_id" });
+  if (error) {
+    console.error("Failed to store verification token:", error.message);
+    return;
+  }
+
+  const verifyUrl = `${new URL(c.req.url).origin}/verify/${token}`;
+  const sent = await sendVerificationEmail({
+    apiKey: c.env.RESEND_API_KEY,
+    from: fromAddress(c.env.RESEND_FROM_EMAIL),
+    to: email,
+    verifyUrl,
+  });
+  if (!sent.sent) {
+    console.error("Verification email was not sent:", sent.error);
+  }
 }
 
 function randomToken(): string {
