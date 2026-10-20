@@ -60,7 +60,7 @@ submitRoutes.post("/f/:formId", async (c) => {
     if (special.honeypot.length > 0) {
       return successResponse(c, special, form, crypto.randomUUID(), "free");
     }
-    await sendFormVerification(c, form.id, form.target_email ?? "");
+    await sendFormVerification(c, form.id, form.target_email ?? "", form.owner_id);
     return unverifiedResponse(c, form.target_email ?? "", special);
   }
 
@@ -270,7 +270,7 @@ async function handleSubmission(c: AppContext, form: FormRow, fields: ParsedBody
         data: fields,
         fileLinks,
         subject: special.subject || form.default_subject,
-        cc: special.cc || form.default_cc,
+        cc: await verifiedCc(c, form, special.cc || form.default_cc),
         // Without an explicit _replyto, replying to the notification should reach
         // whoever submitted the form.
         replyTo: special.replyTo || detectSubmitterEmail(fields),
@@ -493,6 +493,18 @@ function unverifiedResponse(c: AppContext, email: string, special: SpecialFields
   );
 }
 
+/** IPv4 as-is; IPv6 grouped by /48 so rotating addresses share one bucket. */
+function ipRateKey(ip: string): string {
+  if (!ip.includes(":")) return ip;
+  const [head, tail = ""] = ip.toLowerCase().split("::");
+  const left = head ? head.split(":") : [];
+  const right = tail ? tail.split(":") : [];
+  const groups = ip.includes("::")
+    ? [...left, ...Array(Math.max(0, 8 - left.length - right.length)).fill("0"), ...right]
+    : left;
+  return `${groups.slice(0, 3).map((g) => g || "0").join(":")}::/48`;
+}
+
 function clientIp(c: AppContext): string {
   return (
     c.req.header("CF-Connecting-IP") ||
@@ -523,31 +535,46 @@ function decodeTargetEmail(encoded: string): string | null {
   return null;
 }
 
-// Minimum gap between verification emails for the same form, so posting to an
-// unverified form can't be used to flood the target inbox.
-const VERIFICATION_RESEND_MS = 60 * 60 * 1000;
+// Verification-email caps (database, 1-hour windows). Per normalized target address,
+// per owner and per client IP, so posting to unverified forms can't flood inboxes.
+const VERIFY_LIMIT_PER_EMAIL = 1;
+const VERIFY_LIMIT_PER_OWNER = 10;
+const VERIFY_LIMIT_PER_IP = 5;
 
 /**
- * Issue a server-generated token (service role only; tokens live in the private
- * form_verification_tokens table) and email the verify link to the target.
+ * Issue a server-generated token bound to the target address (service role only;
+ * tokens live in the private form_verification_tokens table) and email the link.
  */
-async function sendFormVerification(c: AppContext, formId: string, email: string): Promise<void> {
-  if (!email) return;
+async function sendFormVerification(
+  c: AppContext,
+  formId: string,
+  email: string,
+  ownerId: string | null = null,
+): Promise<void> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return;
   const supabase = createSupabase(c.env);
-  const { data: existing } = await supabase
-    .from("form_verification_tokens")
-    .select("created_at")
-    .eq("form_id", formId)
-    .maybeSingle<{ created_at: string }>();
-
-  if (existing && Date.now() - new Date(existing.created_at).getTime() < VERIFICATION_RESEND_MS) {
-    return; // a link was sent recently
+  // Atomic in the database: one slot from every cap, or none (no email) if any is full.
+  const keys = [`email:${normalized}`, `ip:${ipRateKey(clientIp(c))}`];
+  const limits = [VERIFY_LIMIT_PER_EMAIL, VERIFY_LIMIT_PER_IP];
+  if (ownerId) {
+    keys.push(`owner:${ownerId}`);
+    limits.push(VERIFY_LIMIT_PER_OWNER);
+  }
+  const { data: allowed, error: limitError } = await supabase.rpc("take_verify_slots", {
+    p_keys: keys,
+    p_limits: limits,
+  });
+  if (limitError || allowed !== true) {
+    if (limitError) console.error("Verification rate limit check failed:", limitError.message);
+    return;
   }
 
   const token = randomToken();
-  const { error } = await supabase
-    .from("form_verification_tokens")
-    .upsert({ form_id: formId, token, created_at: new Date().toISOString() }, { onConflict: "form_id" });
+  const { error } = await supabase.from("form_verification_tokens").upsert(
+    { form_id: formId, token, target_email: normalized, created_at: new Date().toISOString() },
+    { onConflict: "form_id" },
+  );
   if (error) {
     console.error("Failed to store verification token:", error.message);
     return;
@@ -563,6 +590,41 @@ async function sendFormVerification(c: AppContext, formId: string, email: string
   if (!sent.sent) {
     console.error("Verification email was not sent:", sent.error);
   }
+}
+
+/**
+ * Keep only cc addresses verified for this form's owner: the owner's own email
+ * or the target_email of one of the owner's verified forms. Others are dropped
+ * silently. Ownerless (zero-config) forms never cc.
+ */
+async function verifiedCc(c: AppContext, form: FormRow, raw: string | null | undefined): Promise<string | null> {
+  if (!raw || !form.owner_id) return null;
+
+  const supabase = createSupabase(c.env);
+  const [{ data: profile }, { data: forms }] = await Promise.all([
+    supabase.from("profiles").select("email").eq("id", form.owner_id).maybeSingle<{ email: string | null }>(),
+    supabase.from("forms").select("target_email").eq("owner_id", form.owner_id).eq("is_verified", true),
+  ]);
+  const allowed = new Set<string>();
+  if (profile?.email) allowed.add(profile.email.toLowerCase());
+  for (const row of (forms ?? []) as Array<{ target_email: string | null }>) {
+    if (row.target_email) allowed.add(row.target_email.toLowerCase());
+  }
+  return filterCc(raw, allowed, form.target_email);
+}
+
+/** Pure part of verifiedCc: keep valid, allowed, de-duplicated addresses other than the target. */
+export function filterCc(raw: string, allowed: Set<string>, targetEmail: string | null): string | null {
+  const target = (targetEmail || "").toLowerCase();
+  const kept = [
+    ...new Set(
+      raw
+        .split(/[,;]/)
+        .map((part) => part.trim().toLowerCase())
+        .filter((part) => EMAIL_RE.test(part)),
+    ),
+  ].filter((addr) => allowed.has(addr) && addr !== target);
+  return kept.length > 0 ? kept.join(",") : null;
 }
 
 function randomToken(): string {

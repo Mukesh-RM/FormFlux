@@ -169,7 +169,8 @@ export async function sendSubmissionEmail(
   input: SubmissionEmailInput,
 ): Promise<{ delivered: boolean; error?: string }> {
   const subject = input.subject?.trim() || input.data._subject?.trim() || "New FormFlux submission";
-  const ccRaw = input.cc?.trim() || input.data._cc?.trim();
+  // Only the pre-filtered (verified) cc list from the caller; raw `_cc` is never used.
+  const ccRaw = input.cc?.trim();
   const replyTo = input.replyTo?.trim() || input.data._replyto?.trim();
   const fileLinks = input.fileLinks ?? [];
   // FormSubmit ships "table", "basic" and "box" template names; "basic" is their

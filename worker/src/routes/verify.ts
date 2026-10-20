@@ -13,9 +13,9 @@ verifyRoutes.get("/verify/:token", async (c) => {
   // Tokens are server-only (form_verification_tokens, service role).
   const { data: row, error: tokenError } = await supabase
     .from("form_verification_tokens")
-    .select("form_id")
+    .select("form_id, target_email")
     .eq("token", token)
-    .maybeSingle<{ form_id: string }>();
+    .maybeSingle<{ form_id: string; target_email: string | null }>();
 
   let form: FormRow | null = null;
   let error = tokenError;
@@ -23,6 +23,15 @@ verifyRoutes.get("/verify/:token", async (c) => {
     const res = await supabase.from("forms").select("*").eq("id", row.form_id).maybeSingle<FormRow>();
     form = res.data;
     error = res.error;
+    // Single use: the token is consumed whether or not it still matches.
+    await supabase.from("form_verification_tokens").delete().eq("token", token);
+    // Bound to the address it was issued for.
+    if (
+      form &&
+      (!row.target_email || (form.target_email || "").toLowerCase() !== row.target_email.toLowerCase())
+    ) {
+      form = null;
+    }
   }
 
   if (error) {
