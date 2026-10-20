@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Inbox, LayoutGrid, LogOut, Menu, Settings, Sparkles, X } from "lucide-react";
+import { BookOpen, Inbox, LayoutGrid, LifeBuoy, LogOut, Menu, Settings, Sparkles, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -15,6 +15,7 @@ const NAV = [
   { href: "/forms", label: "Forms", icon: LayoutGrid },
   { href: "/archive", label: "Archive", icon: Inbox },
   { href: "/docs", label: "Docs", icon: BookOpen },
+  { href: "/guide", label: "Guide", icon: LifeBuoy },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
