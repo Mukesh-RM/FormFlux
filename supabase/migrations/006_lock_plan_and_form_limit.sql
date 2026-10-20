@@ -1,4 +1,4 @@
--- FormFlux · DRAFT, NOT APPLIED. Awaiting owner approval.
+-- FormFlux · Applied 2026-10-20 (owner-approved).
 -- 1) Users must not be able to change their own plan through the API.
 -- 2) The per-plan form limit is enforced in the database, not only in the app.
 --    Limits mirror worker/src/lib/plan.ts and dashboard/src/lib/types.ts:
