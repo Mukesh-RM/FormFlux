@@ -1,6 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+// No revalidatePath here: on Cloudflare Pages (next-on-pages, edge runtime) it fails
+// with "Failed to revalidate tag" + "Illegal invocation" and turns a successful
+// action into a 500. These pages are dynamic, and every caller already refreshes
+// (router.refresh / router.push / load()) after the action returns.
+
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { FREE_FORM_LIMIT, planFeatures, type Plan, type ValidationRules } from "@/lib/types";
@@ -70,7 +74,6 @@ export async function createForm(input: { name: string; targetEmail: string }): 
 
   if (error) return { ok: false, error: error.message };
 
-  revalidatePath("/forms");
   return { ok: true, id: (data as { id: string }).id };
 }
 
@@ -128,8 +131,6 @@ export async function updateFormSettings(input: FormSettingsInput): Promise<Acti
 
   if (error) return { ok: false, error: error.message };
 
-  revalidatePath(`/forms/${input.id}`);
-  revalidatePath("/forms");
   return { ok: true };
 }
 
@@ -137,7 +138,6 @@ export async function deleteForm(formId: string): Promise<ActionResult> {
   const { supabase } = await requireUser();
   const { error } = await supabase.from("forms").delete().eq("id", formId);
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/forms");
   return { ok: true };
 }
 
@@ -151,8 +151,6 @@ export async function setSubmissionSpam(
     .update({ is_spam: isSpam })
     .eq("id", submissionId);
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/forms");
-  revalidatePath("/archive");
   return { ok: true };
 }
 
@@ -160,8 +158,6 @@ export async function deleteSubmission(submissionId: string): Promise<ActionResu
   const { supabase } = await requireUser();
   const { error } = await supabase.from("submissions").delete().eq("id", submissionId);
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/forms");
-  revalidatePath("/archive");
   return { ok: true };
 }
 
@@ -185,6 +181,5 @@ export async function verifyFormFromDashboard(formId: string): Promise<ActionRes
 
   const { error } = await supabase.from("forms").update({ is_verified: true }).eq("id", formId);
   if (error) return { ok: false, error: error.message };
-  revalidatePath(`/forms/${formId}`);
   return { ok: true };
 }
