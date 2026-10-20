@@ -48,6 +48,12 @@ export async function createForm(input: { name: string; targetEmail: string }): 
     }
   }
 
+  // Guard against accounts that predate the signup trigger (no profiles row ->
+  // forms_owner_id_fkey). ignoreDuplicates = ON CONFLICT DO NOTHING, so plan is kept.
+  await supabase
+    .from("profiles")
+    .upsert({ id: user.id, email: user.email ?? "" }, { onConflict: "id", ignoreDuplicates: true });
+
   const verificationToken = crypto.randomUUID().replace(/-/g, "");
   const { data, error } = await supabase
     .from("forms")
