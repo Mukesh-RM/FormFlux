@@ -54,11 +54,13 @@ export function validateUploads(files: File[]): string | null {
 }
 
 export async function storeUploads(
-  bucket: R2Bucket,
+  bucket: R2Bucket | undefined,
   formId: string,
   submissionId: string,
   files: File[],
 ): Promise<StoredFile[]> {
+  if (files.length === 0) return [];
+  if (!bucket) throw new Error("FORM_UPLOADS R2 binding is not configured");
   const stored: StoredFile[] = [];
   const used = new Set<string>();
 
@@ -91,7 +93,8 @@ export async function storeUploads(
   return stored;
 }
 
-export async function deleteStoredFiles(bucket: R2Bucket, keys: string[]): Promise<void> {
+export async function deleteStoredFiles(bucket: R2Bucket | undefined, keys: string[]): Promise<void> {
+  if (!bucket || keys.length === 0) return;
   await Promise.all(
     keys.map(async (key) => {
       try {

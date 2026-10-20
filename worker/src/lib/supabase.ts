@@ -11,7 +11,8 @@ export type Bindings = {
   /** Plan applied to forms with no owner yet (zero-config). "free" by default. */
   DEFAULT_PLAN?: string;
   RATE_LIMIT_KV: KVNamespace;
-  FORM_UPLOADS: R2Bucket;
+  /** Optional until R2 is enabled on the Cloudflare account. */
+  FORM_UPLOADS?: R2Bucket;
   WEBHOOK_QUEUE: Queue;
 };
 

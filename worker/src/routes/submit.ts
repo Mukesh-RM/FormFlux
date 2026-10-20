@@ -161,12 +161,13 @@ async function handleSubmission(c: AppContext, form: FormRow, fields: ParsedBody
     return validationErrorResponse(c, special, errors);
   }
 
-  // `_captcha=false` is a per-submission override of the form-level captcha setting.
+  // When the owner requires captcha, a client-supplied `_captcha=false` is ignored:
+  // anyone can add that field, so honouring it would let bots bypass the check.
   let captchaState: "not_required" | "passed" | "skipped_by_field" = "not_required";
   if (form.captcha_enabled && special.captchaDisabled) {
-    captchaState = "skipped_by_field";
-    console.info("Captcha skipped via _captcha=false", { formId: form.id });
-  } else if (form.captcha_enabled) {
+    console.warn("Ignoring _captcha=false; owner requires captcha", { formId: form.id });
+  }
+  if (form.captcha_enabled) {
     const captcha = await verifyHCaptcha({
       secret: c.env.HCAPTCHA_SECRET || "",
       token: captchaToken(fields),

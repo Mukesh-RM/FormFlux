@@ -10,6 +10,10 @@ fileRoutes.get("/files/:formId/:submissionId/:filename{.+}", async (c) => {
   const filename = safeFilename(c.req.param("filename"));
   const key = `${formId}/${submissionId}/${filename}`;
 
+  if (!c.env.FORM_UPLOADS) {
+    return c.json({ success: false, error: "File storage is not available yet" }, 503);
+  }
+
   const object = await c.env.FORM_UPLOADS.get(key);
   if (!object) {
     return c.json({ success: false, error: "File not found" }, 404);
